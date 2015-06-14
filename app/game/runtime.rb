@@ -24,10 +24,12 @@ class BasicSheet
     @size_cell = cell
     @width = width; @height = height
     @sheet = SDL2::Video::Surface.load_bmp(file)
-    @texture = SDL2::Video::Texture.new(renderer, @sheet)
+
     @sheet.rle true
-    #TODO mruby-sdl2  need implementation SDL_MapRGB
-    #@sheet.color_key_set(...)
+
+    @sheet.color_key_set(1, @sheet.format.mapRGB(0xff, 0x00, 0xff))
+
+    @texture = SDL2::Video::Texture.new(renderer, @sheet)
     @static = {}
   end
 
