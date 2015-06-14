@@ -80,25 +80,49 @@ class BasicMap
   end
 end
 
-### SYSTEMA MANAGER
+### SYSTEM MANAGER
 SystemManager.instance.userdata[:screen] = {
   :width => 256, :height => 256,
   :cols => 15, :rows => 15
 }
+SystemManager.instance.userdata[:player] = {
+  life: 4
+}
+
+SystemManager.instance.observer.add(:collision) {|entity, with|
+  if entity[ComponentHurt] and with[ComponentSolid]
+    EntityManager.instance.delete(entity[ComponentEntityID].id)
+    ComponentManager.instance.delete(entity[ComponentEntityID].id)
+  end
+  
+  #destroy something brickable when receive damage
+  if entity[ComponentHurt] and with[ComponentBrick]
+    EntityManager.instance.delete(with[ComponentEntityID].id)
+    ComponentManager.instance.delete(with[ComponentEntityID].id)
+  end
+
+  #ups the fire destroy the item
+  if entity[ComponentHurt] and with[ComponentDrag]
+    EntityManager.instance.delete(with[ComponentEntityID].id)
+    ComponentManager.instance.delete(with[ComponentEntityID].id)
+  end
+
+  #the entity take a item
+  if entity[ComponentAvatar] and with[ComponentDrag]
+    EntityManager.instance.delete(with[ComponentEntityID].id)
+    ComponentManager.instance.delete(with[ComponentEntityID].id)
+  end
+
+  if entity[ComponentHurt] and with[ComponentPlayer]
+    puts "upss that's hurt"
+  end
+
+  if entity[ComponentPlayer]
+    puts "upss tha't to hard"
+  end
+}
 
 SystemManager.instance.add{|userdata, observer|
-  observer.add(:collision) {|entity, with|
-    if entity[ComponentHurt] and with[ComponentSolid]
-      EntityManager.instance.delete(entity[ComponentEntityID].id)
-      ComponentManager.instance.delete(entity[ComponentEntityID].id)
-    end
-
-    #destroy something brickable when receive damage
-    if entity[ComponentHurt] and with[ComponentBrick]
-      EntityManager.instance.delete(with[ComponentEntityID].id)
-      ComponentManager.instance.delete(with[ComponentEntityID].id)
-    end
-  }
   
   ComponentManager.instance.select{|entity| entity[ComponentBomb] || entity[ComponentHurt] || entity[ComponentTickout]}.each{|entity|
     tickout = entity[ComponentBomb] || entity[ComponentHurt] || entity[ComponentTickout]
@@ -230,6 +254,7 @@ begin
       ComponentManager.instance.set(eid, ComponentSystemEvent.new)
       ComponentManager.instance.set(eid, ComponentDirection.new(:right))
       ComponentManager.instance.set(eid, ComponentPosition.new(5, 5))
+      ComponentManager.instance.set(eid, ComponentSolid.new)
       ComponentManager.instance.set(eid, ComponentPlayer.new(SDL2::Input::Keyboard::SDL_SCANCODE_8, SDL2::Input::Keyboard::SDL_SCANCODE_5, SDL2::Input::Keyboard::SDL_SCANCODE_4, SDL2::Input::Keyboard::SDL_SCANCODE_6, SDL2::Input::Keyboard::SDL_SCANCODE_0))
       ComponentManager.instance.set(eid, ComponentAvatar.new({
                                                                standing: AnimateFrame.new([[0, 4]]),
@@ -243,6 +268,7 @@ begin
     
 
     while !$quit
+
       while !(ev = SDL2::Input::poll).nil?
         if ev.type == SDL2::Input::SDL_QUIT then
           $quit = true; break
@@ -282,7 +308,7 @@ begin
           userdata[entity][:anim].render(sheet, renderer, entity[ComponentPosition])
         }
 
-
+        
       }
         
       renderer.present

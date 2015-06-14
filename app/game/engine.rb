@@ -88,6 +88,7 @@ class SystemManager
   extend Singleton
   
   attr_accessor :userdata
+  attr_reader :observer
 
   def add(&system)
     @systems << system

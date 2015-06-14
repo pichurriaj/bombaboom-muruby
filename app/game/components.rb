@@ -72,6 +72,30 @@ class ComponentBomb < ComponentTickout
   end
 end
 
+#Class ComponentDrag
+# When a player over just destroy
+class ComponentDrag
+end
+
+class ComponentItem
+  def initialize(&action)
+    @action = action
+  end
+
+  def run
+    @action.call
+  end
+end
+
+#Class ComponentAI
+#Strategy it's just a symbol with anyone of:
+#  * :terminator, find and destroy, just walk directly to one player for destroy
+#  * :bunny, just walk any direction destroy box and get items, alway run when close to player
+class ComponentAI < Struct.new(:strategy)
+end
+
+
+
 class ComponentBrick
 end
 
